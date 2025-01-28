@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Snow Day Calculator</title>
+    <link rel="stylesheet" href="https://use.typekit.net/ptq8jqe.css"> <!-- ADDED FONT LINK HERE -->
+    <style>
+        /* Dark Mode Styles using CSS Variables */
+        :root {
+            --bg-color: #f0efe7;         /* Light background */
+            --text-color: #3d3929;       /* Dark text */
+            --secondary-text-color: #716d61; /* Subheading text color */
+            --section-bg-color: white;   /* Section background */
+            --section-text-color: #848276; /* Section text color */
+            --section-heading-color: #5a574d; /* Section heading color */
+            --button-bg-color: #da7c5d;    /* Button background */
+            --button-hover-bg-color: #c06548; /* Button hover background */
+            --border-color: #e0e0e0;      /* Border color */
+        }
+
+        body.dark-mode {
+            --bg-color: #121212;         /* Dark background */
+            --text-color: #f0f0f0;       /* Light text */
+            --secondary-text-color: #a0a0a0; /* Lighter subheading text */
+            --section-bg-color: #1e1e1e;   /* Darker section background */
+            --section-text-color: #c0c0c0; /* Lighter section text */
+            --section-heading-color: #d0d0d0; /* Lighter section heading */
+            --button-bg-color: #4a90e2;    /* Different button color in dark mode */
+            --button-hover-bg-color: #357abd; /* Button hover in dark mode */
+            --border-color: #333;         /* Darker border */
+        }
+
+
+        body {
+            font-family: sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center; /* Center horizontally */
+            padding: 25px;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            min-height: 100vh; /* Ensure body takes full viewport height */
+            justify-content: flex-start; /* Align content to the top */
+            opacity: 0; /* Initially hidden for fade-in animation */
+            transform: translateY(20px); /* Initial position for slide-up animation */
+            animation: fadeInSlideUp 1s ease-out forwards 0.2s; /* Combined fade-in and slide-up */
+        }
+
+        @keyframes fadeInSlideUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h1 {
+            font-family: "spectral", sans-serif; /* ADDED FONT FAMILY HERE */
+            color: var(--text-color);
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+            letter-spacing: -1px;
+            opacity: 0;
+            transform: translateY(-10px);
+            animation: fadeInSlideDown 0.8s ease-out forwards 0.4s;
+        }
+
+        h2 {
+            color: var(--text-color);
+            text-align: center;
+            margin-bottom: 15px; /* More margin below h2 */
+            font-size: 1.8em; /* Slightly larger h2 */
+            opacity: 0;
+            transform: translateY(-10px);
+            animation: fadeInSlideDown 0.8s ease-out forwards 0.6s;
+        }
+
+        @keyframes fadeInSlideDown {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+
+        #subheading {
+            font-size: 1em; /* Slightly larger subheading */
+            color: var(--secondary-text-color);
+            text-align: center;
+            margin-bottom: 25px; /* Increased margin below subheading */
+            font-style: italic; /* Keep italic style */
+            opacity: 0;
+            transform: translateY(-10px);
+            animation: fadeInSlideDown 0.8s ease-out forwards 0.8s;
+        }
+
+        #dateDisplay {
+            background-color: var(--section-bg-color);
+            color: var(--section-text-color);
+            padding: 15px 20px; /* Increased padding */
+            border-radius: 12px; /* More rounded corners */
+            margin: 20px 0; /* Increased margin */
+            width: auto; /* Adjust width to content */
+            min-width: 300px; /* Minimum width */
+            text-align: center;
+            font-size: 1.1em; /* Slightly larger date font */
+            box-shadow: 0 3px 6px rgba(0,0,0,0.08); /* Subtle shadow for depth */
+            opacity: 0;
+            transform: scale(0.95);
+            animation-fill-mode: forwards;
+            animation-delay: 1s;
+            animation-duration: 0.6s;
+            animation-name: fadeInScaleUp;
+        }
+
+        @keyframes fadeInScaleUp {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+
+        #weatherData, #prediction {
+            background-color: var(--section-bg-color);
+            border-radius: 15px; /* More rounded corners */
+            padding: 25px; /* Increased padding */
+            margin-top: 25px; /* Increased margin */
+            width: 100%; /* Take full width of parent */
+            max-width: 400px; /* Maximum width for larger screens */
+            text-align: left;
+            color: var(--section-text-color);
+            box-sizing: border-box;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1); /* More pronounced shadow */
+            opacity: 0; /* Hidden initially */
+            transform: translateY(20px); /* Slide in from bottom */
+            transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+        }
+
+        #weatherData.show, #prediction.show {
+            opacity: 1; /* Fade in */
+            transform: translateY(0); /* Slide to final position */
+        }
+
+
+        #weatherData h2, #prediction h2 {
+            text-align: left; /* Align h2 inside these sections to the left */
+            margin-top: 0; /* Remove top margin for h2 inside sections */
+            margin-bottom: 20px; /* Add bottom margin */
+            color: var(--section-heading-color);
+            font-size: 1.6em; /* Slightly smaller h2 in sections */
+        }
+
+        #weatherData p, #prediction p {
+            line-height: 1.6; /* Improved line height for readability */
+            margin-bottom: 10px; /* Spacing between paragraphs */
+            font-size: 1em; /* Slightly larger paragraph text */
+            color: var(--section-text-color); /* Ensure paragraphs use section text color */
+        }
+
+        button {
+            padding: 12px 25px; /* Adjusted button padding */
+            font-size: 1.1em; /* Slightly larger button text */
+            cursor: pointer;
+            margin-bottom: 30px; /* Increased button margin */
+            border-radius: 10px; /* More rounded button corners */
+            background-color: var(--button-bg-color);
+            color: white;
+            border: none;
+            transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease; /* Added box-shadow transition */
+            box-shadow: 0 3px 8px rgba(0,0,0,0.15); /* Button shadow */
+        }
+
+        button:hover {
+            background-color: var(--button-hover-bg-color);
+            transform: translateY(-2px) scale(1.02); /* Slight lift and scale on hover */
+            box-shadow: 0 6px 12px rgba(0,0,0,0.2); /* Enhanced shadow on hover */
+        }
+
+        button:active {
+            transform: translateY(0) scale(0.98); /* Reset lift and slight scale down on active */
+            box-shadow: 0 2px 4px rgba(0,0,0,0.15); /* Reduced shadow on active */
+        }
+
+        button.analyzing {
+            animation: pulse 1.5s infinite alternate;
+            pointer-events: none;
+        }
+
+        @keyframes pulse {
+            from { opacity: 1; transform: scale(1); }
+            to { opacity: 0.7; transform: scale(0.98); }
+        }
+
+        #bottomSection {
+            display: flex;
+            justify-content: center; /* Center content horizontally */
+            align-items: center;
+            width: 100%;
+            margin-top: 40px; /* Increased bottom section margin */
+            padding: 20px 0; /* Padding for bottom section */
+            border-top: 1px solid var(--border-color);
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInSlideUp 1s ease-out forwards 1.2s;
+            flex-direction: column; /* Stack items vertically for toggle */
+        }
+
+        #bottomSection img {
+            height: 60px; /* Slightly larger image */
+            margin-right: 15px; /* Increased image margin */
+            mask-image: radial-gradient(circle at center, white 60%, transparent 100%);
+            -webkit-mask-image: radial-gradient(circle at center, white 60%, transparent 100%);
+            mask-mode: alpha;
+            -webkit-mask-mode: alpha;
+            opacity: 0.9; /* Slightly reduce image opacity */
+            transition: opacity 0.3s ease; /* Smooth opacity transition */
+            margin-right: 0; /* Remove margin for vertical layout */
+            margin-bottom: 10px; /* Add margin below image */
+        }
+
+        #bottomSection img:hover {
+            opacity: 1; /* Full opacity on hover */
+            transform: scale(1.05); /* Slight scale up on hover */
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+
+        #bottomSection p {
+            color: var(--section-heading-color);
+            font-style: italic;
+            font-size: 1em; /* Slightly larger bottom text */
+            margin-bottom: 15px; /* Add margin for spacing */
+        }
+
+        .probability {
+            font-size: 2.8em; /* Larger probability font */
+            font-weight: bold;
+            color: var(--button-bg-color);
+            letter-spacing: -1px; /* Tighten letter spacing */
+            display: block; /* Make it a block element for full width */
+            text-align: center; /* Center the probability number */
+            margin-bottom: 10px; /* Margin below probability */
+            opacity: 0;
+            transform: scale(0.8);
+            transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+        }
+
+        .probability.show {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        #snowflakes {
+            position: fixed; /* Stay in place even when scrolling */
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none; /* Don't interfere with clicks on other elements */
+            z-index: -1; /* Place behind all other content */
+        }
+
+        .snowflake {
+            position: absolute;
+            width: 5px;
+            height: 5px;
+            background: white;
+            border-radius: 50%;
+            opacity: 0.7;
+            animation: snowfall 6s linear infinite; /* Animation for falling */
+        }
+
+        @keyframes snowfall {
+            0% {
+                transform: translateY(0);
+                opacity: 0.7;
+            }
+            100% {
+                transform: translateY(100vh); /* Fall to the bottom of the viewport */
+                opacity: 0;
+            }
+        }
+
+        /* Dark Mode Toggle Button Styles */
+        #darkModeToggle {
+            padding: 10px 20px;
+            font-size: 0.9em;
+            cursor: pointer;
+            border-radius: 8px;
+            background-color: var(--section-bg-color); /* Match section background */
+            color: var(--section-heading-color); /* Match section heading color */
+            border: 1px solid var(--border-color); /* Add a border */
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1); /* Subtle shadow */
+            margin-left: 20px; /* Space from the text */
+            margin-left: 0; /* Remove left margin for vertical layout */
+        }
+
+        #darkModeToggle:hover {
+            background-color: var(--button-hover-bg-color); /* Use button hover color for toggle hover */
+            color: white; /* White text on hover */
+            border-color: var(--button-hover-bg-color);
+        }
+
+        #darkModeToggle:active {
+            transform: translateY(1px); /* Small press effect */
+            box-shadow: 0 1px 3px rgba(0,0,0,0.15); /* Reduced shadow on active */
+        }
+    </style>
+</head>
+<body>
+    <div id="snowflakes" aria-hidden="true"></div> <!-- Snowflake container -->
+    <h1>RSU1 Snow Day Calculator</h1>
+    <p id="subheading">world's most accurate</p>
+    <div id="dateDisplay">Calculating for tomorrow...</div>
+    <button id="calculateButton">Calculate Snow Day Chance</button>
+
+    <div id="weatherData">
+        <h2>Tomorrow's Forecast</h2>
+        <p>Predicted Temperature: <span id="temperature"></span></p>
+        <p>Predicted Snow: <span id="snow"></span></p>
+        <p>Previous Day's Snow: <span id="prevSnow"></span></p>
+    </div>
+
+    <div id="prediction">
+        <h2>Snow Day Prediction</h2>
+        <p id="predictionText">Click "Calculate" to see the prediction.</p>
+    </div>
+
+    <div id="bottomSection">
+        <img src="https://www.pressherald.com/wp-content/uploads/sites/4/2011/04/m-bath-rsu1-superintendent-patrick-manuel.jpg" alt="Patrick Manuel">
+        <p>Please, Patrick! we need a break!</p>
+        <button id="darkModeToggle">Night <span id="darkModeText">Off</span></button>
+    </div>
+
+    <script>
+        // Constants for our location (Bath, ME)
+        const LAT = 43.915;
+        const LON = -69.837222;
+
+        // Utility function to format dates
+        function formatDate(date) {
+            return new Intl.DateTimeFormat('en-US', {
+                weekday: 'long',
+            }).format(date);
+        }
+
+        // Our sophisticated probability calculations
+        function calculateSnowfallProbability(snowfall) {
+            if (snowfall <= 1) return 5 + (15 * snowfall);
+            if (snowfall <= 3) return 20 + (10 * (snowfall - 1));
+            if (snowfall <= 6) return 40 + (13.33 * (snowfall - 3));
+            return Math.min(95, 80 + (3 * (snowfall - 6)));
+        }
+
+        function calculateTempProbability(temp) {
+            if (temp > 20) return 5;
+            if (temp > 0) return 5 + (4.5 * (20 - temp));
+            return 95;
+        }
+
+        function calculatePrevSnowProbability(prevSnow) {
+            if (prevSnow <= 2) return 5 + (7.5 * prevSnow);
+            if (prevSnow <= 4) return 20 + (20 * (prevSnow - 2));
+            return Math.min(95, 60 + (7 * (prevSnow - 4)));
+        }
+
+        function calculateFinalProbability(snowfall, temp, prevSnow) {
+            // Manual override: if no snow is predicted, probability is 0
+            if (snowfall === 0) {
+                return 0;
+            }
+
+            const snowfallProb = calculateSnowfallProbability(snowfall);
+            const tempProb = calculateTempProbability(temp);
+            const prevSnowProb = calculatePrevSnowProbability(prevSnow);
+
+            // Adjusted weights: Snowfall increased to 0.5, Temperature decreased to 0.2
+            let probability = (snowfallProb * 0.5) + (tempProb * 0.2) + (prevSnowProb * 0.3);
+
+            // Apply scale and ensure it doesn't exceed 100%
+            probability = Math.min(100, probability * 1.15);
+
+            return probability;
+        }
+
+        const calculateButton = document.getElementById('calculateButton');
+        const temperatureDisplay = document.getElementById('temperature');
+        const snowDisplay = document.getElementById('snow');
+        const prevSnowDisplay = document.getElementById('prevSnow');
+        const predictionText = document.getElementById('predictionText');
+        const dateDisplay = document.getElementById('dateDisplay');
+        const weatherDataSection = document.getElementById('weatherData');
+        const predictionSection = document.getElementById('prediction');
+
+        // Snowflake animation script
+        const snowContainer = document.getElementById('snowflakes');
+        const snowflakeCount = 50; // Adjust for more or fewer snowflakes
+
+        for (let i = 0; i < snowflakeCount; i++) {
+            const snowflake = document.createElement('div');
+            snowflake.classList.add('snowflake');
+            snowflake.style.left = `${Math.random() * 100}vw`; // Random horizontal position
+            snowflake.style.animationDelay = `${Math.random() * 3}s`; // Random animation start delay
+            snowflake.style.animationDuration = `${Math.random() * 4 + 4}s`; // Random animation duration (4-8s)
+            snowflake.style.opacity = Math.random(); // Random opacity
+            snowflake.style.width = `${Math.random() * 3 + 2}px`; // Random size
+            snowflake.style.height = snowflake.style.width; // Keep height and width equal
+            snowContainer.appendChild(snowflake);
+        }
+
+        const darkModeToggle = document.getElementById('darkModeToggle');
+        const darkModeText = document.getElementById('darkModeText');
+
+        // Function to toggle dark mode
+        function toggleDarkMode() {
+            document.body.classList.toggle('dark-mode');
+            const isDarkMode = document.body.classList.contains('dark-mode');
+            localStorage.setItem('darkMode', isDarkMode); // Store preference in localStorage
+            darkModeText.textContent = isDarkMode ? 'On' : 'Off'; // Update toggle text
+        }
+
+        // Event listener for the dark mode toggle button
+        darkModeToggle.addEventListener('click', toggleDarkMode);
+
+        // Check for dark mode preference on page load
+        if (localStorage.getItem('darkMode') === 'true') {
+            document.body.classList.add('dark-mode');
+            darkModeText.textContent = 'On';
+        }
+
+
+        // Update the date display immediately
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        dateDisplay.innerHTML = `Calculating for <strong>${formatDate(tomorrow)}</strong>`; // Modified to use innerHTML for bold date
+
+        calculateButton.addEventListener('click', async () => {
+            calculateButton.textContent = "Analyzing...";
+            calculateButton.classList.add('analyzing');
+            weatherDataSection.classList.remove('show'); // Hide previous data if any
+            predictionSection.classList.remove('show');   // Hide previous prediction
+            predictionText.innerHTML = `Click "Calculate" to see the prediction.`; // Reset prediction text
+
+            setTimeout(() => { // Add a small delay before fetching data for animation to be noticeable
+                fetchWeatherData();
+            }, 300); // 300ms delay
+
+            async function fetchWeatherData() {
+                try {
+                    // Fetch weather data from weather.gov
+                    const pointResponse = await fetch(
+                        `https://api.weather.gov/points/${LAT},${LON}`,
+                        {
+                            headers: {
+                                'User-Agent': 'SnowDayCalculator/1.0 (snowdaycalculator@protonmail.com)'
+                            }
+                        }
+                    );
+                    const pointData = await pointResponse.json();
+
+                    // Get both regular and hourly forecasts
+                    const [forecastResponse, hourlyResponse] = await Promise.all([
+                        fetch(pointData.properties.forecast, {
+                            headers: {
+                                'User-Agent': 'SnowDayCalculator/1.0 (snowdaycalculator@protonmail.com)'
+                            }
+                        }),
+                        fetch(pointData.properties.forecastHourly, {
+                            headers: {
+                                'User-Agent': 'SnowDayCalculator/1.0 (snowdaycalculator@protonmail.com)'
+                            }
+                        })
+                    ]);
+
+                    const forecastData = await forecastResponse.json();
+                    const hourlyData = await hourlyResponse.json();
+
+                    // Process tomorrow's hourly data
+                    const tomorrowHourly = hourlyData.properties.periods.filter(period => {
+                        const periodDate = new Date(period.startTime);
+                        return periodDate.getDate() === tomorrow.getDate();
+                    });
+
+                    // Calculate minimum temperature and snow accumulation for tomorrow
+                    const minTemp = Math.min(...tomorrowHourly.map(period => period.temperature));
+                    const snowfall = tomorrowHourly.reduce((acc, period) => {
+                        if (period.temperature <= 32 && period.probabilityOfPrecipitation.value > 0) {
+                            return acc + (period.probabilityOfPrecipitation.value / 100) * 0.1;
+                        }
+                        return acc;
+                    }, 0);
+
+                    // Calculate remaining snow for today (from current hour until midnight)
+                    const now = new Date();
+                    const todayRemaining = hourlyData.properties.periods.filter(period => {
+                        const periodDate = new Date(period.startTime);
+                        return periodDate.getDate() === now.getDate() &&
+                               periodDate.getHours() >= now.getHours();
+                    });
+
+                    const prevSnow = todayRemaining.reduce((acc, period) => {
+                        // Only accumulate snow when temperature is at or below freezing and there's precipitation
+                        if (period.temperature <= 32 && period.probabilityOfPrecipitation.value > 0) {
+                            // Convert precipitation probability to potential snowfall
+                            // Using a simple model where each hour of 100% precipitation at freezing
+                            // contributes about 0.1 inches of snow
+                            return acc + (period.probabilityOfPrecipitation.value / 100) * 0.1;
+                        }
+                        return acc;
+                    }, 0);
+
+                    // Update displays
+                    temperatureDisplay.textContent = `${minTemp}°F (minimum)`;
+                    snowDisplay.textContent = `${snowfall.toFixed(1)} inches predicted`;
+                    prevSnowDisplay.textContent = `${prevSnow.toFixed(1)} inches`;
+
+                    weatherDataSection.classList.add('show'); // Show weather data section with animation
+
+                    // Calculate and display final probability
+                    const probability = calculateFinalProbability(snowfall, minTemp, prevSnow);
+                    predictionText.innerHTML = `
+                        <span class="probability">${probability.toFixed(1)}%</span> <br><br>
+                        ${getDescriptiveText(probability)}
+                    `;
+                    // Use set timeout to ensure probability animation triggers after the text is updated
+                    setTimeout(() => {
+                        predictionSection.classList.add('show'); // Show prediction section with animation
+                        const probabilitySpan = predictionText.querySelector('.probability');
+                        if (probabilitySpan) {
+                            probabilitySpan.classList.add('show'); // Animate probability number
+                        }
+                    }, 100);
+
+
+                } catch (error) {
+                    console.error("Error fetching weather data:", error);
+                    predictionText.textContent = "Error fetching weather data. Please try again later.";
+                    predictionSection.classList.add('show'); // Still show error message area
+                } finally {
+                    calculateButton.textContent = "Calculate Snow Day Chance";
+                    calculateButton.classList.remove('analyzing');
+                }
+            }
+        });
+
+        function getDescriptiveText(probability) {
+            if (probability >= 80) {
+                return "High likelihood of a snow day tomorrow!";
+            } else if (probability >= 40) {
+                return "There's a decent chance! Keep an eye on those weather reports!";
+            } else if (probability >= 10) {
+                return "Don't get your hopes up too high, but there's a small chance!";
+            } else {
+                return "Yeah, not gonna happen.";
+            }
+        }
+    </script>
+</body>
+</html>
