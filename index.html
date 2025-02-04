@@ -520,7 +520,7 @@
 
             setTimeout(() => { // Add a small delay before fetching data for animation to be noticeable
                 fetchWeatherData();
-            }, 300); // 300ms delay
+            }, 700); // 700ms delay
 
             async function fetchWeatherData() {
                 try {
@@ -597,7 +597,7 @@
                     // If both snowfall and previous day's snowfall are functionally zero,
                     // set probability to 0%
                     let mlpProbability;
-                    const threshold = 0.1; // Adjust this threshold as needed
+                    const threshold = 0.2; // Adjust this threshold as needed
                     if (snowfall < threshold && prevSnow < threshold) {
                         mlpProbability = 0;
                     } else {
