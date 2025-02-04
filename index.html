@@ -339,6 +339,77 @@
     </div>
 
     <script>
+        // Model weights from Snowday Model F2 0.912.json
+        const weights = {
+            "W1": [
+                [0.41663657747586713, 0.5256001778225754, 2.1566107829165384],
+                [-0.7556965015080414, -1.7543907837051484, 0.24571689278812842],
+                [0.46303925095762705, -0.16221288582505167, -0.2893163450287195],
+                [0.8132460484584749, -0.7063328189834551, -1.857206041364893],
+                [0.8493428004272436, -0.08194846637293386, 0.2881652505650596],
+                [0.8929670284270083, -0.24857252350997114, -0.38856121748190847],
+                [0.013065484479550698, -1.5157351152575074, 0.45289147387516354],
+                [0.8079531247713924, 1.2261087544157487, 0.4851562113095939]
+            ],
+            "b1": [
+                [0.003005140757832803],
+                [-0.02749235861910012],
+                [0.07267728745945415],
+                [-0.03737230554086685],
+                [0.038856390481357764],
+                [-0.0388372356576684],
+                [-0.03052688095705094],
+                [-0.008072900817557165]
+            ],
+            "W2": [
+                [0.09751955264289433, -1.0467263585083966, 0.9994834833401101, -0.4255949608721677, 0.5736469822120318, -0.4420086549415937, -0.6605809275033416, 0.014654692656513325]
+            ],
+            "b2": [
+                [0.11315243401435356]
+            ]
+        };
+        const calibration = {
+            "temperature": 1.6536551017280212,
+            "optimal_threshold": 0.444443502330337
+        };
+
+        function sigmoid(z) {
+            return 1 / (1 + Math.exp(-z));
+        }
+
+        function relu(z) {
+            return Math.max(0, z);
+        }
+
+        function calculateMLPSnowDayProbability(x1, x2, x3) {
+            // Input features as a column vector
+            const X_input = [[x1], [x2], [x3]];
+
+            // --- Layer 1 ---
+            let a1 = [];
+            for (let i = 0; i < weights.W1.length; i++) {
+                let sum = 0;
+                for (let j = 0; j < weights.W1[0].length; j++) {
+                    sum += weights.W1[i][j] * X_input[j][0];
+                }
+                a1.push([relu(sum + weights.b1[i][0])]);
+            }
+
+            // --- Layer 2 ---
+            let y_hat_logit = 0;
+            for (let i = 0; i < weights.W2[0].length; i++) {
+                y_hat_logit += weights.W2[0][i] * a1[i][0];
+            }
+            y_hat_logit += weights.b2[0][0];
+            let raw_prob = sigmoid(y_hat_logit);
+
+            // --- Calibration ---
+            const logit = Math.log(raw_prob / (1 - raw_prob));
+            const calibrated_prob = sigmoid(logit / calibration.temperature);
+            return calibrated_prob;
+        }
+
+
         // Constants for our location (Bath, ME)
         const LAT = 43.915;
         const LON = -69.837222;
@@ -350,7 +421,7 @@
             }).format(date);
         }
 
-        // Our sophisticated probability calculations
+        // Our sophisticated probability calculations (OLD - now MLP)
         function calculateSnowfallProbability(snowfall) {
             if (snowfall <= 1) return 5 + (15 * snowfall);
             if (snowfall <= 3) return 20 + (10 * (snowfall - 1));
@@ -370,7 +441,7 @@
             return Math.min(95, 60 + (7 * (prevSnow - 4)));
         }
 
-        function calculateFinalProbability(snowfall, temp, prevSnow) {
+        function calculateStatisticalProbability(snowfall, temp, prevSnow) { // Renamed to differentiate
             // Manual override: if no snow is predicted, probability is 0
             if (snowfall === 0) {
                 return 0;
@@ -522,12 +593,25 @@
 
                     weatherDataSection.classList.add('show'); // Show weather data section with animation
 
-                    // Calculate and display final probability
-                    const probability = calculateFinalProbability(snowfall, minTemp, prevSnow);
-                    predictionText.innerHTML = `
-                        <span class="probability">${probability.toFixed(1)}%</span> <br><br>
-                        ${getDescriptiveText(probability)}
-                    `;
+                    // --- NEW OVERRIDE LOGIC ---
+                    // If both snowfall and previous day's snowfall are functionally zero,
+                    // set probability to 0%
+                    let mlpProbability;
+                    const threshold = 0.1; // Adjust this threshold as needed
+                    if (snowfall < threshold && prevSnow < threshold) {
+                        mlpProbability = 0;
+                    } else {
+                        mlpProbability = calculateMLPSnowDayProbability(snowfall, prevSnow, minTemp);
+                    }
+
+                    // Calculate and display final probability (using MLP now)
+                    const probabilityPercentage = (mlpProbability * 100).toFixed(1);
+                    const prediction = mlpProbability >= calibration.optimal_threshold ? "Yes" : "No";
+
+                    predictionText.innerHTML = 
+                        `<span class="probability">${probabilityPercentage}%</span> <br><br>
+                        Snow Day Predicted: <strong>${prediction}</strong><br><br>
+                        ${getDescriptiveText(probabilityPercentage)}`;
                     // Use set timeout to ensure probability animation triggers after the text is updated
                     setTimeout(() => {
                         predictionSection.classList.add('show'); // Show prediction section with animation
@@ -550,11 +634,12 @@
         });
 
         function getDescriptiveText(probability) {
-            if (probability >= 80) {
+            const prob = parseFloat(probability); // Ensure probability is a number
+            if (prob >= 80) {
                 return "High likelihood of a snow day tomorrow!";
-            } else if (probability >= 40) {
+            } else if (prob >= 40) {
                 return "There's a decent chance! Keep an eye on those weather reports!";
-            } else if (probability >= 10) {
+            } else if (prob >= 10) {
                 return "Don't get your hopes up too high, but there's a small chance!";
             } else {
                 return "Yeah, not gonna happen.";
