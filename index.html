@@ -1,650 +1,660 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Snow Day Calculator</title>
-    <link rel="stylesheet" href="https://use.typekit.net/ptq8jqe.css"> <!-- ADDED FONT LINK HERE -->
-    <style>
-        /* Dark Mode Styles using CSS Variables */
-        :root {
-            --bg-color: #f0efe7;         /* Light background */
-            --text-color: #3d3929;       /* Dark text */
-            --secondary-text-color: #716d61; /* Subheading text color */
-            --section-bg-color: white;   /* Section background */
-            --section-text-color: #848276; /* Section text color */
-            --section-heading-color: #5a574d; /* Section heading color */
-            --button-bg-color: #da7c5d;    /* Button background */
-            --button-hover-bg-color: #c06548; /* Button hover background */
-            --border-color: #e0e0e0;      /* Border color */
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Snow Day Calculator</title>
+  <link rel="stylesheet" href="https://use.typekit.net/ptq8jqe.css" />
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg=="
+    crossorigin="anonymous"
+    referrerpolicy="no-referrer"
+  />
+  <style>
+    /*----------------------------------------------------
+      CSS Variables for Light & Dark Modes
+    ----------------------------------------------------*/
+    :root {
+      --body-bg: #f0efe7;
+      --box-bg: #ffffff;
+      --heading-text: #3d3929;
+      --non-heading-text: #98958e;
+      --accent-color: #da7c5d;
+      --accent-hover-color: #c06548;
+      --border-color: #e0e0e0;
+      --gauge-bg: #e0e0e0;
+    }
+    body.dark-mode {
+      --body-bg: #272726;
+      --box-bg: #3e3d3a;
+      --heading-text: #e2e2df;
+      --non-heading-text: #98958e;
+      --accent-color: #da7c5d;
+      --accent-hover-color: #c06548;
+      --border-color: #333;
+      --gauge-bg: #4a4a48; /* Darker background for gauge */
+    }
 
-        body.dark-mode {
-            --bg-color: #121212;         /* Dark background */
-            --text-color: #f0f0f0;       /* Light text */
-            --secondary-text-color: #a0a0a0; /* Lighter subheading text */
-            --section-bg-color: #1e1e1e;   /* Darker section background */
-            --section-text-color: #c0c0c0; /* Lighter section text */
-            --section-heading-color: #d0d0d0; /* Lighter section heading */
-            --button-bg-color: #4a90e2;    /* Different button color in dark mode */
-            --button-hover-bg-color: #357abd; /* Button hover in dark mode */
-            --border-color: #333;         /* Darker border */
-        }
+    /*----------------------------------------------------
+      Global Styles
+    ----------------------------------------------------*/
+    body {
+      font-family: sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 25px;
+      background-color: var(--body-bg);
+      color: var(--heading-text);
+      min-height: 100vh;
+      justify-content: flex-start;
+      opacity: 0;
+      transform: translateY(20px);
+      animation: fadeInSlideUp 1s ease-out forwards 0.2s;
+    }
+    @keyframes fadeInSlideUp {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    h1 {
+      font-family: "chivo", sans-serif;
+      color: var(--heading-text);
+      text-align: center;
+      margin-bottom: 10px;
+      font-size: 2.5em;
+      letter-spacing: -1px;
+      opacity: 0;
+      transform: translateY(-10px);
+      animation: fadeInSlideDown 0.8s ease-out forwards 0.4s;
+    }
+    h2 {
+      color: var(--heading-text);
+      text-align: center;
+      margin-top: 0;
+      margin-bottom: 30px;  /* Increased margin for spacing */
+      font-size: 1.8em;
+      opacity: 0;
+      transform: translateY(-10px);
+      animation: fadeInSlideDown 0.8s ease-out forwards 0.6s;
+    }
+    @keyframes fadeInSlideDown {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    #subheading {
+      font-size: 1em;
+      color: var(--non-heading-text);
+      text-align: center;
+      margin-bottom: 25px;
+      font-style: italic;
+      opacity: 0;
+      transform: translateY(-10px);
+      animation: fadeInSlideDown 0.8s ease-out forwards 0.8s;
+    }
 
+    /*----------------------------------------------------
+      Box Elements: Date Display, Weather Data, Prediction
+    ----------------------------------------------------*/
+    /* Date Display remains visible with its fade-in */
+    #dateDisplay {
+      background-color: var(--box-bg);
+      border-radius: 12px;
+      padding: 15px 20px;
+      margin: 20px 0;
+      width: auto;
+      min-width: 300px;
+      text-align: center;
+      font-size: 1.1em;
+      box-shadow: 0 3px 6px rgba(0, 0, 0, 0.08);
+      animation-fill-mode: forwards;
+      animation-delay: 1s;
+      animation-duration: 0.6s;
+      animation-name: fadeInScaleUp;
+    }
+    @keyframes fadeInScaleUp {
+      from { opacity: 0; transform: scale(0.95); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    /* Weather Data & Prediction boxes start hidden */
+    #weatherData,
+    #prediction {
+      background-color: var(--box-bg);
+      border-radius: 15px;
+      padding: 30px;
+      margin-top: 25px;
+      width: 100%;
+      max-width: 500px;
+      text-align: left;
+      color: var(--non-heading-text);
+      box-sizing: border-box;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+    }
+    #weatherData.show,
+    #prediction.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
 
-        body {
-            font-family: sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center; /* Center horizontally */
-            padding: 25px;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            min-height: 100vh; /* Ensure body takes full viewport height */
-            justify-content: flex-start; /* Align content to the top */
-            opacity: 0; /* Initially hidden for fade-in animation */
-            transform: translateY(20px); /* Initial position for slide-up animation */
-            animation: fadeInSlideUp 1s ease-out forwards 0.2s; /* Combined fade-in and slide-up */
-        }
+    /*----------------------------------------------------
+      Current Conditions: Horizontal Layout
+    ----------------------------------------------------*/
+    .conditions {
+      display: flex;
+      justify-content: space-around;
+      align-items: flex-start;
+      gap: 30px;
+    }
+    /* On very small screens, stack the groups vertically */
+    @media (max-width: 470px) {
+      .conditions {
+        flex-direction: column;
+        align-items: center;
+        gap: 15px;
+      }
+    }
+    .condition-group {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      padding: 10px;
+    }
+    /* Icons use the accent color */
+    .condition-group i {
+      font-size: 2em;
+      color: var(--accent-color);
+    }
+    /* Data values use the heading color */
+    .condition-group .data-value {
+      font-weight: bold;
+      font-size: 1.5em;
+      color: var(--heading-text);
+    }
+    .condition-group .condition-label {
+      font-size: 1em;
+      color: var(--non-heading-text);
+      text-align: center;
+    }
 
-        @keyframes fadeInSlideUp {
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
+    /*----------------------------------------------------
+      Prediction Text & Gauge
+    ----------------------------------------------------*/
+    #prediction p {
+      line-height: 1.6;
+      margin-bottom: 10px;
+      font-size: 1em;
+      color: var(--non-heading-text);
+    }
+    /* Gauge Container uses a CSS variable for background */
+    #gauge {
+      position: relative;
+      width: 100%;
+      height: 30px;
+      background: var(--gauge-bg);
+      border-radius: 15px;
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+    #gauge-fill {
+      background: var(--accent-color);
+      height: 100%;
+      width: 0;
+      transition: width 1s ease-out;
+    }
+    #gauge-text {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      color: var(--heading-text);
+    }
+    /* New container for the prediction result text */
+    .prediction-result {
+      text-align: center;
+      margin-top: 20px;
+    }
+    .prediction-header {
+      color: var(--heading-text);
+      font-size: 1em;
+      margin-bottom: 10px;
+    }
+    .prediction-description {
+      color: var(--non-heading-text);
+      font-size: 1em;
+    }
 
-        h1 {
-            font-family: "chivo", sans-serif; /* ADDED FONT FAMILY HERE */
-            color: var(--text-color);
-            text-align: center;
-            margin-bottom: 10px;
-            font-size: 2.5em;
-            letter-spacing: -1px;
-            opacity: 0;
-            transform: translateY(-10px);
-            animation: fadeInSlideDown 0.8s ease-out forwards 0.4s;
-        }
+    /*----------------------------------------------------
+      Buttons
+    ----------------------------------------------------*/
+    button {
+      padding: 12px 25px;
+      font-size: 1.1em;
+      cursor: pointer;
+      margin-bottom: 30px;
+      border-radius: 10px;
+      background-color: var(--accent-color);
+      color: #ffffff;
+      border: none;
+      transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+    }
+    button:hover {
+      background-color: var(--accent-hover-color);
+      transform: translateY(-2px) scale(1.02);
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+    }
+    button:active {
+      transform: translateY(0) scale(0.98);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
+    }
+    button.analyzing {
+      animation: pulse 1.5s infinite alternate;
+      pointer-events: none;
+    }
+    @keyframes pulse {
+      from { opacity: 1; transform: scale(1); }
+      to { opacity: 0.7; transform: scale(0.98); }
+    }
 
-        h2 {
-            color: var(--text-color);
-            text-align: center;
-            margin-bottom: 15px; /* More margin below h2 */
-            font-size: 1.8em; /* Slightly larger h2 */
-            opacity: 0;
-            transform: translateY(-10px);
-            animation: fadeInSlideDown 0.8s ease-out forwards 0.6s;
-        }
+    /*----------------------------------------------------
+      Bottom Section & Dark Mode Toggle
+    ----------------------------------------------------*/
+    #bottomSection {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+      margin-top: 40px;
+      padding: 20px 0;
+      border-top: 1px solid var(--border-color);
+      opacity: 0;
+      transform: translateY(20px);
+      animation: fadeInSlideUp 1s ease-out forwards 1.2s;
+      flex-direction: column;
+    }
+    #bottomSection img {
+      height: 60px;
+      margin-bottom: 10px;
+      mask-image: radial-gradient(circle at center, white 60%, transparent 100%);
+      -webkit-mask-image: radial-gradient(circle at center, white 60%, transparent 100%);
+      mask-mode: alpha;
+      -webkit-mask-mode: alpha;
+      opacity: 0.9;
+      transition: opacity 0.3s ease;
+    }
+    #bottomSection img:hover {
+      opacity: 1;
+      transform: scale(1.05);
+      transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+    #bottomSection p {
+      color: var(--heading-text);
+      font-style: italic;
+      font-size: 1em;
+      margin-bottom: 15px;
+    }
+    #darkModeToggle {
+      padding: 10px 20px;
+      font-size: 0.9em;
+      cursor: pointer;
+      border-radius: 8px;
+      background-color: var(--box-bg);
+      color: var(--heading-text);
+      border: 1px solid var(--border-color);
+      transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      margin: 0;
+    }
+    #darkModeToggle:hover {
+      background-color: var(--accent-hover-color);
+      color: #ffffff;
+      border-color: var(--accent-hover-color);
+    }
+    #darkModeToggle:active {
+      transform: translateY(1px);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+    }
 
-        @keyframes fadeInSlideDown {
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
+    /*----------------------------------------------------
+      Snowflakes (Unchanged)
+    ----------------------------------------------------*/
+    #snowflakes {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: -1;
+    }
+    .snowflake {
+      position: absolute;
+      width: 5px;
+      height: 5px;
+      background: white;
+      border-radius: 50%;
+      opacity: 0.7;
+      animation: snowfall 6s linear infinite;
+    }
+    @keyframes snowfall {
+      0% { transform: translateY(0); opacity: 0.7; }
+      100% { transform: translateY(100vh); opacity: 0; }
+    }
 
-
-        #subheading {
-            font-size: 1em; /* Slightly larger subheading */
-            color: var(--secondary-text-color);
-            text-align: center;
-            margin-bottom: 25px; /* Increased margin below subheading */
-            font-style: italic; /* Keep italic style */
-            opacity: 0;
-            transform: translateY(-10px);
-            animation: fadeInSlideDown 0.8s ease-out forwards 0.8s;
-        }
-
-        #dateDisplay {
-            background-color: var(--section-bg-color);
-            color: var(--section-text-color);
-            padding: 15px 20px; /* Increased padding */
-            border-radius: 12px; /* More rounded corners */
-            margin: 20px 0; /* Increased margin */
-            width: auto; /* Adjust width to content */
-            min-width: 300px; /* Minimum width */
-            text-align: center;
-            font-size: 1.1em; /* Slightly larger date font */
-            box-shadow: 0 3px 6px rgba(0,0,0,0.08); /* Subtle shadow for depth */
-            opacity: 0;
-            transform: scale(0.95);
-            animation-fill-mode: forwards;
-            animation-delay: 1s;
-            animation-duration: 0.6s;
-            animation-name: fadeInScaleUp;
-        }
-
-        @keyframes fadeInScaleUp {
-            from {
-                opacity: 0;
-                transform: scale(0.95);
-            }
-            to {
-                opacity: 1;
-                transform: scale(1);
-            }
-        }
-
-
-        #weatherData, #prediction {
-            background-color: var(--section-bg-color);
-            border-radius: 15px; /* More rounded corners */
-            padding: 25px; /* Increased padding */
-            margin-top: 25px; /* Increased margin */
-            width: 100%; /* Take full width of parent */
-            max-width: 400px; /* Maximum width for larger screens */
-            text-align: left;
-            color: var(--section-text-color);
-            box-sizing: border-box;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1); /* More pronounced shadow */
-            opacity: 0; /* Hidden initially */
-            transform: translateY(20px); /* Slide in from bottom */
-            transition: opacity 0.5s ease-out, transform 0.5s ease-out;
-        }
-
-        #weatherData.show, #prediction.show {
-            opacity: 1; /* Fade in */
-            transform: translateY(0); /* Slide to final position */
-        }
-
-
-        #weatherData h2, #prediction h2 {
-            text-align: left; /* Align h2 inside these sections to the left */
-            margin-top: 0; /* Remove top margin for h2 inside sections */
-            margin-bottom: 20px; /* Add bottom margin */
-            color: var(--section-heading-color);
-            font-size: 1.6em; /* Slightly smaller h2 in sections */
-        }
-
-        #weatherData p, #prediction p {
-            line-height: 1.6; /* Improved line height for readability */
-            margin-bottom: 10px; /* Spacing between paragraphs */
-            font-size: 1em; /* Slightly larger paragraph text */
-            color: var(--section-text-color); /* Ensure paragraphs use section text color */
-        }
-
-        button {
-            padding: 12px 25px; /* Adjusted button padding */
-            font-size: 1.1em; /* Slightly larger button text */
-            cursor: pointer;
-            margin-bottom: 30px; /* Increased button margin */
-            border-radius: 10px; /* More rounded button corners */
-            background-color: var(--button-bg-color);
-            color: white;
-            border: none;
-            transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease; /* Added box-shadow transition */
-            box-shadow: 0 3px 8px rgba(0,0,0,0.15); /* Button shadow */
-        }
-
-        button:hover {
-            background-color: var(--button-hover-bg-color);
-            transform: translateY(-2px) scale(1.02); /* Slight lift and scale on hover */
-            box-shadow: 0 6px 12px rgba(0,0,0,0.2); /* Enhanced shadow on hover */
-        }
-
-        button:active {
-            transform: translateY(0) scale(0.98); /* Reset lift and slight scale down on active */
-            box-shadow: 0 2px 4px rgba(0,0,0,0.15); /* Reduced shadow on active */
-        }
-
-        button.analyzing {
-            animation: pulse 1.5s infinite alternate;
-            pointer-events: none;
-        }
-
-        @keyframes pulse {
-            from { opacity: 1; transform: scale(1); }
-            to { opacity: 0.7; transform: scale(0.98); }
-        }
-
-        #bottomSection {
-            display: flex;
-            justify-content: center; /* Center content horizontally */
-            align-items: center;
-            width: 100%;
-            margin-top: 40px; /* Increased bottom section margin */
-            padding: 20px 0; /* Padding for bottom section */
-            border-top: 1px solid var(--border-color);
-            opacity: 0;
-            transform: translateY(20px);
-            animation: fadeInSlideUp 1s ease-out forwards 1.2s;
-            flex-direction: column; /* Stack items vertically for toggle */
-        }
-
-        #bottomSection img {
-            height: 60px; /* Slightly larger image */
-            margin-right: 15px; /* Increased image margin */
-            mask-image: radial-gradient(circle at center, white 60%, transparent 100%);
-            -webkit-mask-image: radial-gradient(circle at center, white 60%, transparent 100%);
-            mask-mode: alpha;
-            -webkit-mask-mode: alpha;
-            opacity: 0.9; /* Slightly reduce image opacity */
-            transition: opacity 0.3s ease; /* Smooth opacity transition */
-            margin-right: 0; /* Remove margin for vertical layout */
-            margin-bottom: 10px; /* Add margin below image */
-        }
-
-        #bottomSection img:hover {
-            opacity: 1; /* Full opacity on hover */
-            transform: scale(1.05); /* Slight scale up on hover */
-            transition: opacity 0.3s ease, transform 0.3s ease;
-        }
-
-        #bottomSection p {
-            color: var(--section-heading-color);
-            font-style: italic;
-            font-size: 1em; /* Slightly larger bottom text */
-            margin-bottom: 15px; /* Add margin for spacing */
-        }
-
-        .probability {
-            font-size: 2.8em; /* Larger probability font */
-            font-weight: bold;
-            color: var(--button-bg-color);
-            letter-spacing: -1px; /* Tighten letter spacing */
-            display: block; /* Make it a block element for full width */
-            text-align: center; /* Center the probability number */
-            margin-bottom: 10px; /* Margin below probability */
-            opacity: 0;
-            transform: scale(0.8);
-            transition: opacity 0.5s ease-out, transform 0.5s ease-out;
-        }
-
-        .probability.show {
-            opacity: 1;
-            transform: scale(1);
-        }
-
-        #snowflakes {
-            position: fixed; /* Stay in place even when scrolling */
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none; /* Don't interfere with clicks on other elements */
-            z-index: -1; /* Place behind all other content */
-        }
-
-        .snowflake {
-            position: absolute;
-            width: 5px;
-            height: 5px;
-            background: white;
-            border-radius: 50%;
-            opacity: 0.7;
-            animation: snowfall 6s linear infinite; /* Animation for falling */
-        }
-
-        @keyframes snowfall {
-            0% {
-                transform: translateY(0);
-                opacity: 0.7;
-            }
-            100% {
-                transform: translateY(100vh); /* Fall to the bottom of the viewport */
-                opacity: 0;
-            }
-        }
-
-        /* Dark Mode Toggle Button Styles */
-        #darkModeToggle {
-            padding: 10px 20px;
-            font-size: 0.9em;
-            cursor: pointer;
-            border-radius: 8px;
-            background-color: var(--section-bg-color); /* Match section background */
-            color: var(--section-heading-color); /* Match section heading color */
-            border: 1px solid var(--border-color); /* Add a border */
-            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1); /* Subtle shadow */
-            margin-left: 20px; /* Space from the text */
-            margin-left: 0; /* Remove left margin for vertical layout */
-        }
-
-        #darkModeToggle:hover {
-            background-color: var(--button-hover-bg-color); /* Use button hover color for toggle hover */
-            color: white; /* White text on hover */
-            border-color: var(--button-hover-bg-color);
-        }
-
-        #darkModeToggle:active {
-            transform: translateY(1px); /* Small press effect */
-            box-shadow: 0 1px 3px rgba(0,0,0,0.15); /* Reduced shadow on active */
-        }
-    </style>
+    /*----------------------------------------------------
+      Desktop-specific Enhancements
+    ----------------------------------------------------*/
+    @media (min-width: 768px) {
+      #weatherData,
+      #prediction {
+        max-width: 700px;
+        padding: 40px;
+        font-size: 1.2em;
+      }
+      #gauge { height: 35px; }
+    }
+  </style>
 </head>
 <body>
-    <div id="snowflakes" aria-hidden="true"></div> <!-- Snowflake container -->
-    <h1>RSU1 SNOW DAY CALCULATOR</h1>
-    <p id="subheading">world's most accurate</p>
-    <div id="dateDisplay">Calculating for tomorrow...</div>
-    <button id="calculateButton">Calculate Snow Day Chance</button>
+  <div id="snowflakes" aria-hidden="true"></div>
+  <h1>RSU1 SNOW DAY CALCULATOR</h1>
+  <p id="subheading">world's most accurate</p>
+  <div id="dateDisplay">Calculating for tomorrow...</div>
+  <button id="calculateButton">Calculate Snow Day Chance</button>
 
-    <div id="weatherData">
-        <h2>Tomorrow's Forecast</h2>
-        <p>Predicted Temperature: <span id="temperature"></span></p>
-        <p>Predicted Snow: <span id="snow"></span></p>
-        <p>Previous Day's Snow: <span id="prevSnow"></span></p>
+  <!-- Current Conditions: Hidden until calculation -->
+
+  <div id="weatherData">
+    <h2>Current Conditions</h2>
+    <div class="conditions">
+      <div class="condition-group">
+        <i class="fa-solid fa-thermometer-half"></i>
+        <span class="data-value" id="temperature"></span>
+        <span class="condition-label">Temperature</span>
+      </div>
+      <div class="condition-group">
+        <i class="fa-regular fa-snowflake"></i>
+        <span class="data-value" id="snow"></span>
+        <span class="condition-label">Expected Snow</span>
+      </div>
+      <div class="condition-group">
+        <i class="fa-solid fa-history"></i>
+        <span class="data-value" id="prevSnow"></span>
+        <span class="condition-label">Previous Day's Snow</span>
+      </div>
     </div>
+  </div>
 
-    <div id="prediction">
-        <h2>Snow Day Prediction</h2>
-        <p id="predictionText">Click "Calculate" to see the prediction.</p>
-    </div>
+  <!-- Snow Day Prediction: Hidden until calculation -->
 
-    <div id="bottomSection">
-        <img src="https://www.pressherald.com/wp-content/uploads/sites/4/2011/04/m-bath-rsu1-superintendent-patrick-manuel.jpg" alt="Patrick Manuel">
-        <p>Please, Patrick! we need a break!</p>
-        <button id="darkModeToggle">Night <span id="darkModeText">Off</span></button>
-    </div>
+  <div id="prediction">
+    <h2>Snow Day Prediction</h2>
+    <p id="predictionText">Click "Calculate" to see the prediction.</p>
+  </div>
 
-    <script>
-        // Model weights from Snowday Model F2 0.912.json
-        const weights = {
-            "W1": [
-                [0.41663657747586713, 0.5256001778225754, 2.1566107829165384],
-                [-0.7556965015080414, -1.7543907837051484, 0.24571689278812842],
-                [0.46303925095762705, -0.16221288582505167, -0.2893163450287195],
-                [0.8132460484584749, -0.7063328189834551, -1.857206041364893],
-                [0.8493428004272436, -0.08194846637293386, 0.2881652505650596],
-                [0.8929670284270083, -0.24857252350997114, -0.38856121748190847],
-                [0.013065484479550698, -1.5157351152575074, 0.45289147387516354],
-                [0.8079531247713924, 1.2261087544157487, 0.4851562113095939]
-            ],
-            "b1": [
-                [0.003005140757832803],
-                [-0.02749235861910012],
-                [0.07267728745945415],
-                [-0.03737230554086685],
-                [0.038856390481357764],
-                [-0.0388372356576684],
-                [-0.03052688095705094],
-                [-0.008072900817557165]
-            ],
-            "W2": [
-                [0.09751955264289433, -1.0467263585083966, 0.9994834833401101, -0.4255949608721677, 0.5736469822120318, -0.4420086549415937, -0.6605809275033416, 0.014654692656513325]
-            ],
-            "b2": [
-                [0.11315243401435356]
-            ]
-        };
-        const calibration = {
-            "temperature": 1.6536551017280212,
-            "optimal_threshold": 0.444443502330337
-        };
+  <div id="bottomSection">
+    <img src="https://www.pressherald.com/wp-content/uploads/sites/4/2011/04/m-bath-rsu1-superintendent-patrick-manuel.jpg" alt="Patrick Manuel">
+    <p>Please, Patrick! we need a break!</p>
+    <button id="darkModeToggle">Night <span id="darkModeText">Off</span></button>
+  </div>
 
-        function sigmoid(z) {
-            return 1 / (1 + Math.exp(-z));
+  <script>
+    // Model weights from Snowday Model F2 0.912.json
+    const weights = {
+      W1: [
+        [0.41663657747586713, 0.5256001778225754, 2.1566107829165384],
+        [-0.7556965015080414, -1.7543907837051484, 0.24571689278812842],
+        [0.46303925095762705, -0.16221288582505167, -0.2893163450287195],
+        [0.8132460484584749, -0.7063328189834551, -1.857206041364893],
+        [0.8493428004272436, -0.08194846637293386, 0.2881652505650596],
+        [0.8929670284270083, -0.24857252350997114, -0.38856121748190847],
+        [0.013065484479550698, -1.5157351152575074, 0.45289147387516354],
+        [0.8079531247713924, 1.2261087544157487, 0.4851562113095939]
+      ],
+      b1: [
+        [0.003005140757832803],
+        [-0.02749235861910012],
+        [0.07267728745945415],
+        [-0.03737230554086685],
+        [0.038856390481357764],
+        [-0.0388372356576684],
+        [-0.03052688095705094],
+        [-0.008072900817557165]
+      ],
+      W2: [
+        [0.09751955264289433, -1.0467263585083966, 0.9994834833401101, -0.4255949608721677, 0.5736469822120318, -0.4420086549415937, -0.6605809275033416, 0.014654692656513325]
+      ],
+      b2: [[0.11315243401435356]]
+    };
+    const calibration = {
+      temperature: 1.6536551017280212,
+      optimal_threshold: 0.444443502330337
+    };
+
+    function sigmoid(z) {
+      return 1 / (1 + Math.exp(-z));
+    }
+    function relu(z) {
+      return Math.max(0, z);
+    }
+    function calculateMLPSnowDayProbability(x1, x2, x3) {
+      const X_input = [[x1], [x2], [x3]];
+      let a1 = [];
+      for (let i = 0; i < weights.W1.length; i++) {
+        let sum = 0;
+        for (let j = 0; j < weights.W1[0].length; j++) {
+          sum += weights.W1[i][j] * X_input[j][0];
         }
+        a1.push([relu(sum + weights.b1[i][0])]);
+      }
+      let y_hat_logit = 0;
+      for (let i = 0; i < weights.W2[0].length; i++) {
+        y_hat_logit += weights.W2[0][i] * a1[i][0];
+      }
+      y_hat_logit += weights.b2[0][0];
+      let raw_prob = sigmoid(y_hat_logit);
+      const logit = Math.log(raw_prob / (1 - raw_prob));
+      const calibrated_prob = sigmoid(logit / calibration.temperature);
+      return calibrated_prob;
+    }
 
-        function relu(z) {
-            return Math.max(0, z);
+    const LAT = 43.915;
+    const LON = -69.837222;
+    function formatDate(date) {
+      return new Intl.DateTimeFormat("en-US", { weekday: "long" }).format(date);
+    }
+    function calculateSnowfallProbability(snowfall) {
+      if (snowfall <= 1) return 5 + 15 * snowfall;
+      if (snowfall <= 3) return 20 + 10 * (snowfall - 1);
+      if (snowfall <= 6) return 40 + 13.33 * (snowfall - 3);
+      return Math.min(95, 80 + 3 * (snowfall - 6));
+    }
+    function calculateTempProbability(temp) {
+      if (temp > 20) return 5;
+      if (temp > 0) return 5 + 4.5 * (20 - temp);
+      return 95;
+    }
+    function calculatePrevSnowProbability(prevSnow) {
+      if (prevSnow <= 2) return 5 + 7.5 * prevSnow;
+      if (prevSnow <= 4) return 20 + 20 * (prevSnow - 2);
+      return Math.min(95, 60 + 7 * (prevSnow - 4));
+    }
+
+    // Removed the unused calculateStatisticalProbability function
+
+    // New, more robust snowfall prediction function
+    function calculateExpectedSnowfall(periods) {
+      let snowfallTotal = 0;
+      periods.forEach(period => {
+        if (period.temperature <= 32 && period.probabilityOfPrecipitation.value > 0) {
+          // Factor in how much colder it is than freezing to boost accumulation
+          let tempFactor = (32 - period.temperature) / 32;
+          let snowAccumulation = (period.probabilityOfPrecipitation.value / 100) * 0.2 * (1 + tempFactor);
+          snowfallTotal += snowAccumulation;
         }
+      });
+      return snowfallTotal;
+    }
 
-        function calculateMLPSnowDayProbability(x1, x2, x3) {
-            // Input features as a column vector
-            const X_input = [[x1], [x2], [x3]];
+    const calculateButton = document.getElementById("calculateButton");
+    const temperatureDisplay = document.getElementById("temperature");
+    const snowDisplay = document.getElementById("snow");
+    const prevSnowDisplay = document.getElementById("prevSnow");
+    const predictionText = document.getElementById("predictionText");
+    const dateDisplay = document.getElementById("dateDisplay");
+    const weatherDataSection = document.getElementById("weatherData");
+    const predictionSection = document.getElementById("prediction");
 
-            // --- Layer 1 ---
-            let a1 = [];
-            for (let i = 0; i < weights.W1.length; i++) {
-                let sum = 0;
-                for (let j = 0; j < weights.W1[0].length; j++) {
-                    sum += weights.W1[i][j] * X_input[j][0];
-                }
-                a1.push([relu(sum + weights.b1[i][0])]);
+    // Snowflake animation (unchanged)
+    const snowContainer = document.getElementById("snowflakes");
+    const snowflakeCount = 50;
+    for (let i = 0; i < snowflakeCount; i++) {
+      const snowflake = document.createElement("div");
+      snowflake.classList.add("snowflake");
+      snowflake.style.left = `${Math.random() * 100}vw`;
+      snowflake.style.animationDelay = `${Math.random() * 3}s`;
+      snowflake.style.animationDuration = `${Math.random() * 4 + 4}s`;
+      snowflake.style.opacity = Math.random();
+      snowflake.style.width = `${Math.random() * 3 + 2}px`;
+      snowflake.style.height = snowflake.style.width;
+      snowContainer.appendChild(snowflake);
+    }
+
+    const darkModeToggle = document.getElementById("darkModeToggle");
+    const darkModeText = document.getElementById("darkModeText");
+    function toggleDarkMode() {
+      document.body.classList.toggle("dark-mode");
+      const isDarkMode = document.body.classList.contains("dark-mode");
+      localStorage.setItem("darkMode", isDarkMode);
+      darkModeText.textContent = isDarkMode ? "On" : "Off";
+    }
+    darkModeToggle.addEventListener("click", toggleDarkMode);
+    if (localStorage.getItem("darkMode") === "true") {
+      document.body.classList.add("dark-mode");
+      darkModeText.textContent = "On";
+    }
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    dateDisplay.innerHTML = `Calculating for <strong>${formatDate(tomorrow)}</strong>`;
+
+    calculateButton.addEventListener("click", async () => {
+      calculateButton.textContent = "Analyzing...";
+      calculateButton.classList.add("analyzing");
+      weatherDataSection.classList.remove("show");
+      predictionSection.classList.remove("show");
+      predictionText.innerHTML = `Click "Calculate" to see the prediction.`;
+      setTimeout(() => {
+        fetchWeatherData();
+      }, 700);
+      async function fetchWeatherData() {
+        try {
+          const pointResponse = await fetch(`https://api.weather.gov/points/${LAT},${LON}`, {
+            headers: { "User-Agent": "SnowDayCalculator/1.0 (snowdaycalculator@protonmail.com)" }
+          });
+          const pointData = await pointResponse.json();
+          const [forecastResponse, hourlyResponse] = await Promise.all([
+            fetch(pointData.properties.forecast, {
+              headers: { "User-Agent": "SnowDayCalculator/1.0 (snowdaycalculator@protonmail.com)" }
+            }),
+            fetch(pointData.properties.forecastHourly, {
+              headers: { "User-Agent": "SnowDayCalculator/1.0 (snowdaycalculator@protonmail.com)" }
+            })
+          ]);
+          const hourlyData = await hourlyResponse.json();
+          const tomorrowHourly = hourlyData.properties.periods.filter(period => {
+            const periodDate = new Date(period.startTime);
+            return periodDate.getDate() === tomorrow.getDate();
+          });
+          const minTemp = Math.min(...tomorrowHourly.map(period => period.temperature));
+          // Use the new robust snowfall calculation
+          const snowfall = calculateExpectedSnowfall(tomorrowHourly);
+          const now = new Date();
+          const todayRemaining = hourlyData.properties.periods.filter(period => {
+            const periodDate = new Date(period.startTime);
+            return periodDate.getDate() === now.getDate() && periodDate.getHours() >= now.getHours();
+          });
+          const prevSnow = todayRemaining.reduce((acc, period) => {
+            if (period.temperature <= 32 && period.probabilityOfPrecipitation.value > 0) {
+              return acc + (period.probabilityOfPrecipitation.value / 100) * 0.1;
             }
-
-            // --- Layer 2 ---
-            let y_hat_logit = 0;
-            for (let i = 0; i < weights.W2[0].length; i++) {
-                y_hat_logit += weights.W2[0][i] * a1[i][0];
-            }
-            y_hat_logit += weights.b2[0][0];
-            let raw_prob = sigmoid(y_hat_logit);
-
-            // --- Calibration ---
-            const logit = Math.log(raw_prob / (1 - raw_prob));
-            const calibrated_prob = sigmoid(logit / calibration.temperature);
-            return calibrated_prob;
+            return acc;
+          }, 0);
+          temperatureDisplay.textContent = ` ${minTemp}°F `;
+          snowDisplay.textContent = `${snowfall.toFixed(1)}"`;
+          prevSnowDisplay.textContent = `${prevSnow.toFixed(1)}"`;
+          weatherDataSection.classList.add("show");
+          let mlpProbability;
+          const threshold = 0.2;
+          if (snowfall < threshold && prevSnow < threshold) {
+            mlpProbability = 0;
+          } else {
+            mlpProbability = calculateMLPSnowDayProbability(snowfall, prevSnow, minTemp);
+          }
+          // Scale the displayed probability:
+          // For mlpProbability below the backend threshold, map [0, t] to [0, 70].
+          // For values above, map [t, 1] to [70, 100].
+          let displayedProbability;
+          if (mlpProbability < calibration.optimal_threshold) {
+            displayedProbability = (mlpProbability / calibration.optimal_threshold) * 70;
+          } else {
+            displayedProbability = 70 + ((mlpProbability - calibration.optimal_threshold) / (1 - calibration.optimal_threshold)) * 30;
+          }
+          const probabilityPercentage = displayedProbability.toFixed(1);
+          const prediction = mlpProbability >= calibration.optimal_threshold ? "Yes" : "No";
+          // Build the gauge bar HTML and wrap the prediction text in a centered container
+          predictionText.innerHTML = `
+            <div id="gauge">
+              <div id="gauge-fill"></div>
+              <div id="gauge-text">${probabilityPercentage}%</div>
+            </div>
+            <div class="prediction-result">
+              <div class="prediction-header">Snow Day Predicted: <strong>${prediction}</strong></div>
+              <div class="prediction-description">${getDescriptiveText(probabilityPercentage)}</div>
+            </div>
+          `;
+          // Trigger the gauge fill animation
+          setTimeout(() => {
+            document.getElementById("gauge-fill").style.width = probabilityPercentage + "%";
+          }, 50);
+          predictionSection.classList.add("show");
+        } catch (error) {
+          console.error("Error fetching weather data:", error);
+          predictionText.textContent = "Error fetching weather data. Please try again later.";
+          predictionSection.classList.add("show");
+        } finally {
+          calculateButton.textContent = "Calculate Snow Day Chance";
+          calculateButton.classList.remove("analyzing");
         }
+      }
+    });
+    function getDescriptiveText(probability) {
+      const prob = parseFloat(probability);
+      if (prob >= 80) {
+        return "High likelihood of a snow day tomorrow!";
+      } else if (prob >= 40) {
+        return "There's a decent chance! Keep an eye on those weather reports!";
+      } else if (prob >= 10) {
+        return "Don't get your hopes up too high, but there's a small chance!";
+      } else {
+        return "Yeah, not gonna happen.";
+      }
+    }
+  </script>
 
-
-        // Constants for our location (Bath, ME)
-        const LAT = 43.915;
-        const LON = -69.837222;
-
-        // Utility function to format dates
-        function formatDate(date) {
-            return new Intl.DateTimeFormat('en-US', {
-                weekday: 'long',
-            }).format(date);
-        }
-
-        // Our sophisticated probability calculations (OLD - now MLP)
-        function calculateSnowfallProbability(snowfall) {
-            if (snowfall <= 1) return 5 + (15 * snowfall);
-            if (snowfall <= 3) return 20 + (10 * (snowfall - 1));
-            if (snowfall <= 6) return 40 + (13.33 * (snowfall - 3));
-            return Math.min(95, 80 + (3 * (snowfall - 6)));
-        }
-
-        function calculateTempProbability(temp) {
-            if (temp > 20) return 5;
-            if (temp > 0) return 5 + (4.5 * (20 - temp));
-            return 95;
-        }
-
-        function calculatePrevSnowProbability(prevSnow) {
-            if (prevSnow <= 2) return 5 + (7.5 * prevSnow);
-            if (prevSnow <= 4) return 20 + (20 * (prevSnow - 2));
-            return Math.min(95, 60 + (7 * (prevSnow - 4)));
-        }
-
-        function calculateStatisticalProbability(snowfall, temp, prevSnow) { // Renamed to differentiate
-            // Manual override: if no snow is predicted, probability is 0
-            if (snowfall === 0) {
-                return 0;
-            }
-
-            const snowfallProb = calculateSnowfallProbability(snowfall);
-            const tempProb = calculateTempProbability(temp);
-            const prevSnowProb = calculatePrevSnowProbability(prevSnow);
-
-            // Adjusted weights: Snowfall increased to 0.5, Temperature decreased to 0.2
-            let probability = (snowfallProb * 0.5) + (tempProb * 0.2) + (prevSnowProb * 0.3);
-
-            // Apply scale and ensure it doesn't exceed 100%
-            probability = Math.min(100, probability * 1.15);
-
-            return probability;
-        }
-
-        const calculateButton = document.getElementById('calculateButton');
-        const temperatureDisplay = document.getElementById('temperature');
-        const snowDisplay = document.getElementById('snow');
-        const prevSnowDisplay = document.getElementById('prevSnow');
-        const predictionText = document.getElementById('predictionText');
-        const dateDisplay = document.getElementById('dateDisplay');
-        const weatherDataSection = document.getElementById('weatherData');
-        const predictionSection = document.getElementById('prediction');
-
-        // Snowflake animation script
-        const snowContainer = document.getElementById('snowflakes');
-        const snowflakeCount = 50; // Adjust for more or fewer snowflakes
-
-        for (let i = 0; i < snowflakeCount; i++) {
-            const snowflake = document.createElement('div');
-            snowflake.classList.add('snowflake');
-            snowflake.style.left = `${Math.random() * 100}vw`; // Random horizontal position
-            snowflake.style.animationDelay = `${Math.random() * 3}s`; // Random animation start delay
-            snowflake.style.animationDuration = `${Math.random() * 4 + 4}s`; // Random animation duration (4-8s)
-            snowflake.style.opacity = Math.random(); // Random opacity
-            snowflake.style.width = `${Math.random() * 3 + 2}px`; // Random size
-            snowflake.style.height = snowflake.style.width; // Keep height and width equal
-            snowContainer.appendChild(snowflake);
-        }
-
-        const darkModeToggle = document.getElementById('darkModeToggle');
-        const darkModeText = document.getElementById('darkModeText');
-
-        // Function to toggle dark mode
-        function toggleDarkMode() {
-            document.body.classList.toggle('dark-mode');
-            const isDarkMode = document.body.classList.contains('dark-mode');
-            localStorage.setItem('darkMode', isDarkMode); // Store preference in localStorage
-            darkModeText.textContent = isDarkMode ? 'On' : 'Off'; // Update toggle text
-        }
-
-        // Event listener for the dark mode toggle button
-        darkModeToggle.addEventListener('click', toggleDarkMode);
-
-        // Check for dark mode preference on page load
-        if (localStorage.getItem('darkMode') === 'true') {
-            document.body.classList.add('dark-mode');
-            darkModeText.textContent = 'On';
-        }
-
-
-        // Update the date display immediately
-        const tomorrow = new Date();
-        tomorrow.setDate(tomorrow.getDate() + 1);
-        dateDisplay.innerHTML = `Calculating for <strong>${formatDate(tomorrow)}</strong>`; // Modified to use innerHTML for bold date
-
-        calculateButton.addEventListener('click', async () => {
-            calculateButton.textContent = "Analyzing...";
-            calculateButton.classList.add('analyzing');
-            weatherDataSection.classList.remove('show'); // Hide previous data if any
-            predictionSection.classList.remove('show');   // Hide previous prediction
-            predictionText.innerHTML = `Click "Calculate" to see the prediction.`; // Reset prediction text
-
-            setTimeout(() => { // Add a small delay before fetching data for animation to be noticeable
-                fetchWeatherData();
-            }, 700); // 700ms delay
-
-            async function fetchWeatherData() {
-                try {
-                    // Fetch weather data from weather.gov
-                    const pointResponse = await fetch(
-                        `https://api.weather.gov/points/${LAT},${LON}`,
-                        {
-                            headers: {
-                                'User-Agent': 'SnowDayCalculator/1.0 (snowdaycalculator@protonmail.com)'
-                            }
-                        }
-                    );
-                    const pointData = await pointResponse.json();
-
-                    // Get both regular and hourly forecasts
-                    const [forecastResponse, hourlyResponse] = await Promise.all([
-                        fetch(pointData.properties.forecast, {
-                            headers: {
-                                'User-Agent': 'SnowDayCalculator/1.0 (snowdaycalculator@protonmail.com)'
-                            }
-                        }),
-                        fetch(pointData.properties.forecastHourly, {
-                            headers: {
-                                'User-Agent': 'SnowDayCalculator/1.0 (snowdaycalculator@protonmail.com)'
-                            }
-                        })
-                    ]);
-
-                    const forecastData = await forecastResponse.json();
-                    const hourlyData = await hourlyResponse.json();
-
-                    // Process tomorrow's hourly data
-                    const tomorrowHourly = hourlyData.properties.periods.filter(period => {
-                        const periodDate = new Date(period.startTime);
-                        return periodDate.getDate() === tomorrow.getDate();
-                    });
-
-                    // Calculate minimum temperature and snow accumulation for tomorrow
-                    const minTemp = Math.min(...tomorrowHourly.map(period => period.temperature));
-                    const snowfall = tomorrowHourly.reduce((acc, period) => {
-                        if (period.temperature <= 32 && period.probabilityOfPrecipitation.value > 0) {
-                            return acc + (period.probabilityOfPrecipitation.value / 100) * 0.1;
-                        }
-                        return acc;
-                    }, 0);
-
-                    // Calculate remaining snow for today (from current hour until midnight)
-                    const now = new Date();
-                    const todayRemaining = hourlyData.properties.periods.filter(period => {
-                        const periodDate = new Date(period.startTime);
-                        return periodDate.getDate() === now.getDate() &&
-                               periodDate.getHours() >= now.getHours();
-                    });
-
-                    const prevSnow = todayRemaining.reduce((acc, period) => {
-                        // Only accumulate snow when temperature is at or below freezing and there's precipitation
-                        if (period.temperature <= 32 && period.probabilityOfPrecipitation.value > 0) {
-                            // Convert precipitation probability to potential snowfall
-                            // Using a simple model where each hour of 100% precipitation at freezing
-                            // contributes about 0.1 inches of snow
-                            return acc + (period.probabilityOfPrecipitation.value / 100) * 0.1;
-                        }
-                        return acc;
-                    }, 0);
-
-                    // Update displays
-                    temperatureDisplay.textContent = `${minTemp}°F (minimum)`;
-                    snowDisplay.textContent = `${snowfall.toFixed(1)} inches predicted`;
-                    prevSnowDisplay.textContent = `${prevSnow.toFixed(1)} inches`;
-
-                    weatherDataSection.classList.add('show'); // Show weather data section with animation
-
-                    // --- NEW OVERRIDE LOGIC ---
-                    // If both snowfall and previous day's snowfall are functionally zero,
-                    // set probability to 0%
-                    let mlpProbability;
-                    const threshold = 0.2; // Adjust this threshold as needed
-                    if (snowfall < threshold && prevSnow < threshold) {
-                        mlpProbability = 0;
-                    } else {
-                        mlpProbability = calculateMLPSnowDayProbability(snowfall, prevSnow, minTemp);
-                    }
-
-                    // Calculate and display final probability (using MLP now)
-                    const probabilityPercentage = (mlpProbability * 100).toFixed(1);
-                    const prediction = mlpProbability >= calibration.optimal_threshold ? "Yes" : "No";
-
-                    predictionText.innerHTML = 
-                        `<span class="probability">${probabilityPercentage}%</span> <br><br>
-                        Snow Day Predicted: <strong>${prediction}</strong><br><br>
-                        ${getDescriptiveText(probabilityPercentage)}`;
-                    // Use set timeout to ensure probability animation triggers after the text is updated
-                    setTimeout(() => {
-                        predictionSection.classList.add('show'); // Show prediction section with animation
-                        const probabilitySpan = predictionText.querySelector('.probability');
-                        if (probabilitySpan) {
-                            probabilitySpan.classList.add('show'); // Animate probability number
-                        }
-                    }, 100);
-
-
-                } catch (error) {
-                    console.error("Error fetching weather data:", error);
-                    predictionText.textContent = "Error fetching weather data. Please try again later.";
-                    predictionSection.classList.add('show'); // Still show error message area
-                } finally {
-                    calculateButton.textContent = "Calculate Snow Day Chance";
-                    calculateButton.classList.remove('analyzing');
-                }
-            }
-        });
-
-        function getDescriptiveText(probability) {
-            const prob = parseFloat(probability); // Ensure probability is a number
-            if (prob >= 80) {
-                return "High likelihood of a snow day tomorrow!";
-            } else if (prob >= 40) {
-                return "There's a decent chance! Keep an eye on those weather reports!";
-            } else if (prob >= 10) {
-                return "Don't get your hopes up too high, but there's a small chance!";
-            } else {
-                return "Yeah, not gonna happen.";
-            }
-        }
-    </script>
 </body>
 </html>
