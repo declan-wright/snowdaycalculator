@@ -103,7 +103,6 @@
     /*----------------------------------------------------
       Box Elements: Date Display, Weather Data, Prediction
     ----------------------------------------------------*/
-    /* Date Display now uses transitions rather than a keyframe */
     #dateDisplay {
       background-color: var(--box-bg);
       border-radius: 12px;
@@ -118,12 +117,10 @@
       transform: scale(0.95);
       transition: opacity 0.6s ease-out, transform 0.6s ease-out;
     }
-    /* Class added once the date is set */
     #dateDisplay.show {
       opacity: 1;
       transform: scale(1);
     }
-    /* Weather Data & Prediction boxes start hidden */
     #weatherData,
     #prediction {
       background-color: var(--box-bg);
@@ -193,7 +190,6 @@
       font-size: 1em;
       color: var(--non-heading-text);
     }
-    /* Gauge Container with updated styling and shadow */
     #gauge {
       position: relative;
       width: 100%;
@@ -329,6 +325,18 @@
       transform: translateY(1px);
       box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
     }
+    .footer-info {
+      font-size: 0.9em;
+      color: var(--heading-text);
+      margin-top: 10px;
+    }
+    .footer-info a {
+      color: var(--accent-color);
+      text-decoration: none;
+    }
+    .footer-info a:hover {
+      text-decoration: underline;
+    }
 
     /*----------------------------------------------------
       Snowflakes
@@ -409,6 +417,10 @@
   <div id="bottomSection">
     <img src="https://www.pressherald.com/wp-content/uploads/sites/4/2011/04/m-bath-rsu1-superintendent-patrick-manuel.jpg" alt="Patrick Manuel">
     <p>Please, Patrick! we need a break!</p>
+    <p class="footer-info">
+      © 2025 Snow Day Calculator  |  
+      <a href="https://declan-wright.github.io/snowday-privacy-policy/" target="_blank" title="View our privacy policy">Privacy Policy</a>
+    </p>
     <button id="darkModeToggle">Night <span id="darkModeText">Off</span></button>
   </div>
 
@@ -494,7 +506,6 @@
       return Math.min(95, 60 + 7 * (prevSnow - 4));
     }
 
-    // New, more robust snowfall prediction function
     function calculateExpectedSnowfall(periods) {
       let snowfallTotal = 0;
       periods.forEach(period => {
@@ -516,25 +527,20 @@
     const weatherDataSection = document.getElementById("weatherData");
     const predictionSection = document.getElementById("prediction");
 
-    // Set the dateDisplay content and reveal it
     const tomorrow = new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
     dateDisplay.innerHTML = `Calculating for <strong>${formatDate(tomorrow)}</strong>`;
     dateDisplay.classList.add("show");
 
-    // Snowflake animation setup
     const snowContainer = document.getElementById("snowflakes");
     const snowflakeCount = 50;
     for (let i = 0; i < snowflakeCount; i++) {
       const snowflake = document.createElement("div");
       snowflake.classList.add("snowflake");
       snowflake.style.left = `${Math.random() * 100}vw`;
-      // Set a random duration between 4 and 8 seconds
       const duration = Math.random() * 4 + 4;
       snowflake.style.animationDuration = `${duration}s`;
-      // Use a negative delay so each snowflake starts mid-cycle
       snowflake.style.animationDelay = `-${Math.random() * duration}s`;
-      // Optionally, you can also randomize size further if desired
       const size = Math.random() * 3 + 2;
       snowflake.style.width = `${size}px`;
       snowflake.style.height = `${size}px`;
@@ -563,7 +569,7 @@
       predictionText.innerHTML = `Click "Calculate" to see the prediction.`;
       setTimeout(() => {
         fetchWeatherData();
-      }, 700);
+      }, 2000);
       async function fetchWeatherData() {
         try {
           const pointResponse = await fetch(`https://api.weather.gov/points/${LAT},${LON}`, {
@@ -643,9 +649,9 @@
       const prob = parseFloat(probability);
       if (prob >= 80) {
         return "High likelihood of a snow day tomorrow!";
-      } else if (prob >= 40) {
+      } else if (prob >= 70) {
         return "There's a decent chance! Keep an eye on those weather reports!";
-      } else if (prob >= 10) {
+      } else if (prob >= 25) {
         return "Don't get your hopes up too high, but there's a small chance!";
       } else {
         return "Yeah, not gonna happen.";
